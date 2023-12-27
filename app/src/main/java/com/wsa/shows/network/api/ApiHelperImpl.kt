@@ -1,7 +1,5 @@
 package com.wsa.shows.network.api
 
-import com.wsa.shows.network.response.SearchResponse
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,7 +10,7 @@ class ApiHelperImpl @Inject constructor(private val apiService: ApiService) : Ap
         emit(apiService.getTrending(params))
     }
 
-    override fun getSearch(params : HashMap<String, String>): Flow<SearchResponse> = flow {
+    override fun getSearch(params : HashMap<String, String>) = flow {
         emit(apiService.getSearch(params))
     }
 
@@ -20,6 +18,9 @@ class ApiHelperImpl @Inject constructor(private val apiService: ApiService) : Ap
         TODO("Not yet implemented")
     }
 
+    override fun getEpisodes(seriesId: Int?, seasonId: Int?) = flow  {
+        emit(apiService.getEpisodes(seriesId, seasonId))
+    }
 
 
 }

@@ -2,7 +2,6 @@ package com.wsa.shows.di
 
 import android.content.Context
 import androidx.room.Room
-import com.wsa.shows.db.Converters
 import com.wsa.shows.db.WSADatabase
 import com.wsa.shows.db.DBConstants.WSA_DATABASE
 import dagger.Module
@@ -18,15 +17,10 @@ class DatabaseModule {
     @Provides
     @Singleton
     fun provide(@ApplicationContext context: Context) = Room.databaseBuilder(
-        context, WSADatabase::class.java, WSA_DATABASE)
+        context, WSADatabase::class.java, WSA_DATABASE
+    )
         .allowMainThreadQueries()
         .fallbackToDestructiveMigration()
-       // .addTypeConverter(Converters())
         .build()
-
-
-    @Provides
-    @Singleton
-    fun provideTrendingDao(db: WSADatabase) = db.trShowsDao
 
 }

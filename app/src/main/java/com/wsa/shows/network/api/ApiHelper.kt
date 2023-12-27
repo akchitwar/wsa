@@ -1,5 +1,6 @@
 package com.wsa.shows.network.api
 
+import com.wsa.shows.network.response.EpisodesResponse
 import com.wsa.shows.network.response.SearchResponse
 import com.wsa.shows.network.response.TrendingResponse
 import kotlinx.coroutines.flow.Flow
@@ -11,6 +12,6 @@ interface ApiHelper {
 
     fun getSimilar(map: HashMap<String, String>)
 
-
+    fun getEpisodes(seriesId : Int?, seasonId : Int?):  Flow<EpisodesResponse>
 
 }

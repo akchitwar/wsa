@@ -1,8 +1,5 @@
 package com.wsa.shows.ui.component
 
-import android.content.Context
-import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,93 +18,62 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.wsa.shows.R
 import com.wsa.shows.obj.ItemModel
 
-
+/*Component is using to show Trending shows as Grid format inside Home screen*/
 object GridViewComponent {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-     fun ShowGridView(
-        gridList: State<List<ItemModel>>,
-        context: Context
+    fun ShowGridView(
+        modifier: Modifier = Modifier,
+        gridList: List<ItemModel>, onClick: (item: ItemModel) -> Unit
     ) {
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.padding(5.dp),
+            columns = GridCells.Adaptive(150.dp),
+            modifier = modifier,
+        ) {
 
-            ) {
+            items(gridList.size) {
+                val itemModel = gridList[it]
 
-            items(gridList.value.size) {
-                val itemModel = gridList.value[it]
                 Card(
-
                     onClick = {
-                        Toast.makeText(context, " clicked..", Toast.LENGTH_SHORT).show()
+                        onClick(itemModel)
                     },
-
-                    modifier = Modifier.padding(8.dp),
+                    shape = RectangleShape,
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    modifier = Modifier.padding(4.dp),
                     elevation = CardDefaults.cardElevation(2.dp)
 
                 ) {
-                    // on below line we are creating a column on below sides.
                     Column(
-                        // on below line we are adding padding
-                        // padding for our column and filling the max size.
                         Modifier
                             .fillMaxHeight()
                             .fillMaxWidth()
                             .padding(5.dp),
 
-                        // on below line we are adding
-                        // horizontal alignment for our column
                         horizontalAlignment = Alignment.CenterHorizontally,
-
-                        // on below line we are adding
-                        // vertical arrangement for our column
                         verticalArrangement = Arrangement.Center
                     ) {
-                        // on below line we are creating image for our grid view item.
-                        Image(
-                            // on below line we are specifying the drawable image for our image.
-                            //   painter = painterResource(id = courseList[it].languageImg),
-                            painter = painterResource(id = R.drawable.ic_launcher_background),
-                            // on below line we are specifying
-                            // content description for our image
-                            contentDescription = itemModel.overview,
-                            contentScale = ContentScale.Fit,
-                            // on below line we are setting height
-                            // and width for our image.
+                        AsyncImageComponent.ImageFromURLWithPlaceHolder(
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .fillMaxWidth()
-                                .padding(5.dp)
+                                .padding(2.dp), itemModel.posterPath
                         )
 
-                        // on the below line we are adding a spacer.
-                        Spacer(modifier = Modifier.height(9.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
 
-                        // on below line we are creating
-                        // a text for our grid view item
                         Text(
-                            // inside the text on below line we are
-                            // setting text as the language name
-                            // from our modal class.
-                            text = itemModel.originalName ?: "",
-
-                            // on below line we are adding padding
-                            // for our text from all sides.
-                            modifier = Modifier.padding(4.dp),
+                            text = itemModel.name ?: "",
+                            modifier = Modifier.padding(2.dp),
                             maxLines = 2,
+                            softWrap = true,
                             fontWeight = FontWeight.Medium,
-                            fontStyle = FontStyle.Italic,
-                            // on below line we are
-                            // adding color for our text
                             color = Color.Black
                         )
                     }

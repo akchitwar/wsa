@@ -1,15 +1,20 @@
 package com.wsa.shows.ui.model
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wsa.shows.constants.Messages.NO_DATA_FOUND
+import com.wsa.shows.constants.Messages.NO_NETWORK
 import com.wsa.shows.network.NetworkHelper
 import com.wsa.shows.repositories.HomeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,18 +27,41 @@ class HomeViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
-    fun getGridFlow() = homeRepository.gridItemList
+    private val _toastMessageLiveData= MutableLiveData("")
+    val toastMessageLiveData : LiveData<String> = _toastMessageLiveData
+    fun isNetworkAvailable() = networkHelper.isNetworkAvailable()
+    fun getTrShowsFlow() = homeRepository.gridItemList
+
+    fun getError() = homeRepository.error
+
+    fun getFavoritesFlow() = homeRepository.getFavoritesFromDb()
+
+
 
     init {
-        fetchShows()
+        checkTrShowsInDb()
+        fetchShowsDb()
+        if(networkHelper.isNetworkAvailable()){
+            fetchShows()
+        }
+
     }
 
-    fun fetchShows() {
-        if (!networkHelper.isNetworkAvailable()) return
+    private fun checkTrShowsInDb() {
         viewModelScope.launch {
-            _isLoading.emit(true)
+            if (!networkHelper.isNetworkAvailable()) {
+               val status = homeRepository.isTrShowsAvailableInDb().toList().isEmpty()
+                if(status){
+                    sendMessage(NO_DATA_FOUND)
+                }
+
+            }
+        }
+    }
+
+    private fun fetchShows() {
+        viewModelScope.launch {
             homeRepository.refreshTrendingShows()
-                .catch { }
                 .onCompletion {
                     _isLoading.emit(false)
                 }
@@ -41,12 +69,24 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun searchShows(query: String) {
-        if (!networkHelper.isNetworkAvailable()) return
+    fun fetchShowsDb(){
+        viewModelScope.launch {
+            homeRepository.getTrShowFromDb()
+        }
+
+    }
+
+    private fun sendMessage(message: String){
+        _toastMessageLiveData.postValue(message)
+    }
+    private fun searchShows(query: String) {
+        if (!networkHelper.isNetworkAvailable()) {
+            sendMessage(NO_NETWORK)
+            return
+        }
         viewModelScope.launch {
             _isLoading.emit(true)
             homeRepository.searchShows(query)
-                .catch { }
                 .onCompletion {
                     _isLoading.emit(false)
                 }
@@ -56,13 +96,15 @@ class HomeViewModel @Inject constructor(
 
 
     fun onSearch(text: String) {
-        println("===> isNetworkAvailable ${networkHelper.isNetworkAvailable()}")
 
-        //avoiding to call api again
-        if (isLoading.value) return
         if (text.isEmpty()) {
-            fetchShows()
-            //fetch Trending show  data from api or db
+            //fetch Trending shows  from api or db
+            if(networkHelper.isNetworkAvailable())
+                fetchShows()
+            else {
+                fetchShowsDb()
+            }
+
         } else {
             searchShows(text)
         }
