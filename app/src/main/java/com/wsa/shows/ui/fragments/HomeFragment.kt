@@ -1,6 +1,7 @@
 package com.wsa.shows.ui.fragments
 
 import android.annotation.SuppressLint
+import android.inputmethodservice.Keyboard
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,15 +28,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.wsa.shows.R
 import com.wsa.shows.obj.ItemModel
 import com.wsa.shows.ui.component.FavoritePagerComponent
 import com.wsa.shows.ui.component.GridViewComponent.ShowGridView
@@ -47,7 +53,6 @@ import kotlinx.coroutines.launch
 class HomeFragment : Fragment() {
 
     private val homeViewModel by viewModels<HomeViewModel>()
-
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -91,12 +96,12 @@ class HomeFragment : Fragment() {
     }
 
     @SuppressLint("SuspiciousIndentation")
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
     @Composable
     fun ShowSearchBar() {
         var text by remember { mutableStateOf("") }
         var active by remember { mutableStateOf(false) }
-
+        val keyboardController = LocalSoftwareKeyboardController.current
         SearchBar(
             modifier = Modifier.fillMaxWidth(),
             query = text,
@@ -108,7 +113,7 @@ class HomeFragment : Fragment() {
             onSearch = { query ->
                 active = false
                 homeViewModel.onSearch(query)
-
+                keyboardController?.hide()
             },
             onActiveChange = {
 
@@ -164,7 +169,7 @@ class HomeFragment : Fragment() {
         val bundle = Bundle()
         bundle.putParcelable("selected_item", it)
         fragment.arguments = bundle
-        FragmentTransaction.addChildFragment(requireActivity(), fragment)
+        findNavController().navigate(R.id.action_homeFragment_to_detailsFragment, bundle)
     }
 
     @Composable

@@ -122,7 +122,7 @@ class DetailsFragment : Fragment() {
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
 
-                showDescription(
+                ShowDescription(
                     Modifier
                         .wrapContentWidth()
                         .fillMaxWidth()
@@ -162,7 +162,7 @@ class DetailsFragment : Fragment() {
     }
 
     @Composable
-    private fun showDescription(modifier: Modifier = Modifier) {
+    private fun ShowDescription(modifier: Modifier = Modifier) {
         Column(
             modifier = modifier
         ) {
